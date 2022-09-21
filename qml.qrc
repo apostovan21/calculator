@@ -3,5 +3,6 @@
         <file>main.qml</file>
         <file>CalculatorKey.qml</file>
         <file>CalculatorKeyText.qml</file>
+        <file>CalculatorKeyMouse.qml</file>
     </qresource>
 </RCC>

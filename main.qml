@@ -1,13 +1,16 @@
 import QtQuick 2.9
 import QtQuick.Window 2.2
+import QtQuick.Controls 2.2
 
 Window
 {
     id: myWindow
     visible: true
     width: 480
-    height: 740
+    height: 800
     title: qsTr("Calculator")
+
+
 
     Item
     {
@@ -42,6 +45,64 @@ Window
                     verticalAlignment: Text.AlignBottom
                     font.family: "Cascadia Code"
                     text: ""
+                    focus: true
+                    Keys.onEnterPressed:
+                    {
+                        displayText.text = "Result??"
+                        // should add some logic
+                    }
+                }
+            }
+
+            Rectangle
+            {
+                id: settingsArea
+                x: 10
+                y: diplay.height + 20
+
+                width: rootRect.width - x * 2
+                height: 40
+
+                color: "#f5f5f5"
+
+                ButtonGroup
+                {
+                    id: settingsRadioBtnGroup
+                    onClicked:
+                    {
+                        console.log("clicked:", button.text)
+                        myWindow.width = 480 + 100
+                        keysArea.visible = dec.checked ? true : false
+                    }
+                }
+
+
+                Row {
+                    spacing: 5
+                    Label {
+                        x: 10; y: 10
+                        height: settingsArea.height - 20
+                        width: settingsArea.width / 2
+                        text: qsTr("Choose the base:")
+                        font.pixelSize: 16
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignTop
+                        color: "black"
+                    }
+
+                    RadioButton {
+                        id: dec
+                        checked: true
+                        text: qsTr("DEC")
+                        ButtonGroup.group: settingsRadioBtnGroup
+                    }
+
+                    RadioButton {
+                        id: hex
+                        text: qsTr("HEX")
+                        ButtonGroup.group: settingsRadioBtnGroup
+                    }
                 }
             }
 
@@ -49,301 +110,169 @@ Window
             {
                 id: keysArea
                 x: 10
-                y: diplay.height + 20
+                y: diplay.height + settingsArea.height + 40
                 color: "#c0c0c0"
                 width: rootRect.width - x * 2
-                height: 400
+                height: 500
+                clip: true
 
-                CalculatorKey
-                {
-                    x: 0 * keysArea.width / 4
-                    y: 0 * keysArea.height / 4
-                }
+                property int nrKeysOnColumn: 5
+                property int nrKeysOnRow: 4
 
-                CalculatorKey
-                {
-                    x: 1 * keysArea.width / 4
-                    y: 0 * keysArea.height / 4
-                }
+                // ---- 3 free keys -----
 
-                CalculatorKey
+                Row
                 {
-                    x: 2 * keysArea.width / 4
-                    y: 0 * keysArea.height / 4
-                }
-
-                CalculatorKey
-                {
-                    x: 3 * keysArea.width / 4
-                    y: 0 * keysArea.height / 4
-                    color: "lightBlue"
-                    CalculatorKeyText
+                    x: 0; y: 0
+                    spacing: 0
+                    Repeater
                     {
-                        text: "/"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
+                        model: 3
+                        delegate: CalculatorKey
                         {
-                            displayText.text += "/"
-                            // should add some logic
                         }
                     }
                 }
 
-                //--------------------------//
 
-                CalculatorKey
+                //-------------------------------//
+
+                // DIGITS
+
+                Column
                 {
-                    x: 0 * keysArea.width / 4
-                    y: 1 * keysArea.height / 4
-                    CalculatorKeyText
+                    x: 0 * keysArea.width / keysArea.nrKeysOnRow
+                    y: 1 * keysArea.height / keysArea.nrKeysOnColumn
+                    spacing: 0
+                    Repeater
                     {
-                        text: "7"
-                    }
-
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
+                        model: ["7", "4", "1"]
+                        delegate: CalculatorKey
                         {
-                            displayText.text += "7"
-                            // should add some logic
+                            CalculatorKeyText
+                            {
+                                text: modelData
+                            }
+                            property var keyBaseColor: "white"
+                            property var keyColorOnPress: "#dcdcdc"
+
+                            CalculatorKeyMouse
+                            {
+                                onClicked:
+                                {
+                                    displayText.text += modelData
+                                    // should add some logic
+                                }
+                            }
                         }
                     }
                 }
 
-                CalculatorKey
+                Column
                 {
-                    x: 1 * keysArea.width / 4
-                    y: 1 * keysArea.height / 4
-                    CalculatorKeyText
+                    x: 1 * keysArea.width / keysArea.nrKeysOnRow
+                    y: 1 * keysArea.height / keysArea.nrKeysOnColumn
+                    spacing: 0
+                    Repeater
                     {
-                        text: "8"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
+                        model: ["8", "5", "2", "0"]
+                        delegate: CalculatorKey
                         {
-                            displayText.text += "8"
-                            // should add some logic
+                            CalculatorKeyText
+                            {
+                                text: modelData
+                            }
+
+                            property var keyBaseColor: "white"
+                            property var keyColorOnPress: "#dcdcdc"
+
+                            CalculatorKeyMouse
+                            {
+                                onClicked:
+                                {
+                                    displayText.text += modelData
+                                    // should add some logic
+                                }
+                            }
                         }
                     }
                 }
 
-                CalculatorKey
+                Column
                 {
-                    x: 2 * keysArea.width / 4
-                    y: 1 * keysArea.height / 4
-                    CalculatorKeyText
+                    x: 2 * keysArea.width / keysArea.nrKeysOnRow
+                    y: 1 * keysArea.height / keysArea.nrKeysOnColumn
+                    spacing: 0
+                    Repeater
                     {
-                        text: "9"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
+                        model: ["9", "6", "3"]
+                        delegate: CalculatorKey
                         {
-                            displayText.text += "9"
-                            // should add some logic
+                            CalculatorKeyText
+                            {
+                                text: modelData
+                            }
+
+                            property var keyBaseColor: "white"
+                            property var keyColorOnPress: "#dcdcdc"
+
+                            CalculatorKeyMouse
+                            {
+                                onClicked:
+                                {
+                                    displayText.text += modelData
+                                    // should add some logic
+                                }
+                            }
                         }
                     }
                 }
 
-                CalculatorKey
+                // OPERATORS
+
+                Column
                 {
-                    x: 3 * keysArea.width / 4
-                    y: 1 * keysArea.height / 4
-                    color: "lightBlue"
-                    CalculatorKeyText
+                    x: 3 * keysArea.width / 4; y: 0
+                    spacing: 0
+                    Repeater
                     {
-                        text: "*"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
+                        model: ["/", "*", "-", "+"]
+                        delegate: CalculatorKey
                         {
-                            displayText.text += "*"
-                            // should add some logic
+                            property var keyBaseColor: "lightBlue"
+                            property var keyColorOnPress: "#00ced1"
+                            color: keyBaseColor
+                            CalculatorKeyText
+                            {
+                                text: modelData
+                            }
+                            CalculatorKeyMouse
+                            {
+                                onClicked:
+                                {
+                                    displayText.text += modelData
+                                    // should add some logic for opertors
+                                }
+                            }
                         }
                     }
                 }
 
-                //------------------//
+                // SPECIAL KEYS
 
                 CalculatorKey
                 {
-                    x: 0 * keysArea.width / 4
-                    y: 2 * keysArea.height / 4
-                    CalculatorKeyText
-                    {
-                        text: "4"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
-                        {
-                            displayText.text += "4"
-                            // should add some logic
-                        }
-                    }
-                }
-
-                CalculatorKey
-                {
-                    x: 1 * keysArea.width / 4
-                    y: 2 * keysArea.height / 4
-                    CalculatorKeyText
-                    {
-                        text: "5"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
-                        {
-                            displayText.text += "5"
-                            // should add some logic
-                        }
-                    }
-                }
-
-                CalculatorKey
-                {
-                    x: 2 * keysArea.width / 4
-                    y: 2 * keysArea.height / 4
-                    CalculatorKeyText
-                    {
-                        text: "6"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
-                        {
-                            displayText.text += "6"
-                            // should add some logic
-                        }
-                    }
-                }
-
-                CalculatorKey
-                {
-                    x: 3 * keysArea.width / 4
-                    y: 2 * keysArea.height / 4
-                    color: "lightBlue"
-                    CalculatorKeyText
-                    {
-                        text: "-"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
-                        {
-                            displayText.text += "-"
-                            // should add some logic
-                        }
-                    }
-                }
-
-                //------------------//
-
-                CalculatorKey
-                {
-                    x: 0 * keysArea.width / 4
-                    y: 3 * keysArea.height / 4
-                    CalculatorKeyText
-                    {
-                        text: "1"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
-                        {
-                            displayText.text += "1"
-                            // should add some logic
-                        }
-                    }
-                }
-
-                CalculatorKey
-                {
-                    x: 1 * keysArea.width / 4
-                    y: 3 * keysArea.height / 4
-                    CalculatorKeyText
-                    {
-                        text: "2"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
-                        {
-                            displayText.text += "2"
-                            // should add some logic
-                        }
-                    }
-                }
-
-                CalculatorKey
-                {
-                    x: 2 * keysArea.width / 4
-                    y: 3 * keysArea.height / 4
-                    CalculatorKeyText
-                    {
-                        text: "3"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
-                        {
-                            displayText.text += "3"
-                            // should add some logic
-                        }
-                    }
-                }
-
-                CalculatorKey
-                {
-                    x: 3 * keysArea.width / 4
-                    y: 3 * keysArea.height / 4
-                    color: "lightBlue"
-                    CalculatorKeyText
-                    {
-                        text: "+"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
-                        {
-                            displayText.text += "+"
-                            // should add some logic
-                        }
-                    }
-                }
-
-                //------------------//
-
-                CalculatorKey
-                {
-                    x: 0 * keysArea.width / 4
-                    y: 4 * keysArea.height / 4
-                    color: "#d8bfd8"
+                    x: 0 * keysArea.width / keysArea.nrKeysOnRow
+                    y: 4 * keysArea.height / keysArea.nrKeysOnColumn
+                    property var keyBaseColor: "#d8bfd8"
+                    property var keyColorOnPress: "#ff69b4"
+                    color: keyBaseColor
                     CalculatorKeyText
                     {
                         text: "C"
                     }
-                    MouseArea
+                    CalculatorKeyMouse
                     {
-                        anchors.fill: parent
                         onClicked:
                         {
                             displayText.text = ""
@@ -354,34 +283,17 @@ Window
 
                 CalculatorKey
                 {
-                    x: 1 * keysArea.width / 4
-                    y: 4 * keysArea.height / 4
-                    CalculatorKeyText
-                    {
-                        text: "0"
-                    }
-                    MouseArea
-                    {
-                        anchors.fill: parent
-                        onClicked:
-                        {
-                            displayText.text += "0"
-                            // should add some logic
-                        }
-                    }
-                }
-
-                CalculatorKey
-                {
-                    x: 2 * keysArea.width / 4
-                    y: 4 * keysArea.height / 4
+                    x: 2 * keysArea.width / keysArea.nrKeysOnRow
+                    y: 4 * keysArea.height / keysArea.nrKeysOnColumn
                     CalculatorKeyText
                     {
                         text: "."
                     }
-                    MouseArea
+                    property var keyBaseColor: "white"
+                    property var keyColorOnPress: "#dcdcdc"
+
+                    CalculatorKeyMouse
                     {
-                        anchors.fill: parent
                         onClicked:
                         {
                             displayText.text += "."
@@ -390,19 +302,20 @@ Window
                     }
                 }
 
-                
+
                 CalculatorKey
                 {
-                    x: 3 * keysArea.width / 4
-                    y: 4 * keysArea.height / 4
-                    color: "#d8bfd8"
+                    x: 3 * keysArea.width / keysArea.nrKeysOnRow
+                    y: 4 * keysArea.height / keysArea.nrKeysOnColumn
+                    property var keyBaseColor: "#d8bfd8"
+                    property var keyColorOnPress: "#ff69b4"
+                    color: keyBaseColor
                     CalculatorKeyText
                     {
                         text: "="
                     }
-                    MouseArea
+                    CalculatorKeyMouse
                     {
-                        anchors.fill: parent
                         onClicked:
                         {
                             displayText.text = "Result??"
@@ -410,82 +323,12 @@ Window
                         }
                     }
                 }
-
-                //-------------------------------//
-
-                // Tried with colums
-
-//                Column
-//                {
-//                    x: 0; y: 0
-//                    spacing: 0
-//                    Repeater
-//                    {
-//                        model: ["7", "4", "1"]
-//                        delegate: CalculatorKey
-//                        {
-//                            CalculatorKeyText
-//                            {
-//                                text: modelData
-//                            }
-//                        }
-//                    }
-//                }
-
-//                Column
-//                {
-//                    x: keysArea.width / 4; y: 0
-//                    spacing: 0
-//                    Repeater
-//                    {
-//                        model: ["8", "5", "2", "0"]
-//                        delegate: CalculatorKey
-//                        {
-//                            CalculatorKeyText
-//                            {
-//                                text: modelData
-//                            }
-//                        }
-//                    }
-//                }
-
-//                Column
-//                {
-//                    x: 2 * keysArea.width / 4; y: 0
-//                    spacing: 0
-//                    Repeater
-//                    {
-//                        model: ["9", "6", "3"]
-//                        delegate: CalculatorKey
-//                        {
-//                            CalculatorKeyText
-//                            {
-//                                text: modelData
-//                            }
-//                        }
-//                    }
-//                }
-
-//                Column
-//                {
-//                    x: 3 * keysArea.width / 4; y: 0
-//                    spacing: 0
-//                    Repeater
-//                    {
-//                        model: ["/", "*", "-", "+"]
-//                        delegate: CalculatorKey
-//                        {
-//                            color: "lightBlue"
-//                            CalculatorKeyText
-//                            {
-//                                text: modelData
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-
             }
+
+
+            // --------------------------------------------------- //
+
+            // FOOTER
 
             Rectangle
             {
@@ -508,6 +351,8 @@ Window
                     verticalAlignment: Text.AlignVCenter
                 }
             }
+
+            // ------------ //
         }
     }
 }
