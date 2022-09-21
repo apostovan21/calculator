@@ -1,6 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Window 2.2
 import QtQuick.Controls 2.2
+import CalculatorLogic 1.0
 
 Window
 {
@@ -11,6 +12,12 @@ Window
     title: qsTr("Calculator")
 
     property bool isDec: true
+
+    // Logic
+    CalculatorLogic
+    {
+         id: logic
+    }
 
     Item
     {
@@ -34,7 +41,7 @@ Window
                 width: rootRect.width - x * 2
                 height: 130
 
-                TextInput
+                Text
                 {
                     id: displayText
                     x: 5; y: 5
@@ -46,10 +53,22 @@ Window
                     font.family: "Cascadia Code"
                     text: ""
                     focus: true
-                    Keys.onEnterPressed:
+                    Keys.onReleased:
                     {
-                        displayText.text = "Result??"
-                        // should add some logic
+                        if ( event.key === Qt.Key_Enter )
+                        {
+                             displayText.text = "Result??"
+                        }
+                        else if ( event.key === Qt.Key_Delete  )
+                        {
+                             displayText.text = logic.onCleanInput();
+                        }
+                        else
+                        {
+                            displayText.text = logic.onKeyboardInput(event.text);
+                            console.log("input:", event.text)
+
+                        }
                     }
                 }
             }
@@ -124,27 +143,6 @@ Window
                 property int keyWidth: keysArea.width / keysArea.nrKeysOnRow
                 property int keyHeight: keysArea.height / keysArea.nrKeysOnColumn
 
-                // ---- 3 free keys -----
-
-
-                Row
-                {
-                    x: 0; y: 0
-                    spacing: 0
-                    Repeater
-                    {
-                        model: 3
-                        delegate: CalculatorKey
-                        {
-                        }
-                    }
-
-                    // visible: myWindow.isDec ? true : false
-                    visible: false
-                }
-
-                //-------------------------------//
-
                 // ---- ONLY FOR HEXA ---------- //
 
                 Grid
@@ -168,7 +166,7 @@ Window
                              {
                                    onClicked:
                                    {
-                                       isplayText.text += modelData
+                                       displayText.text += modelData
                                         // should add some logic
                                    }
                              }
@@ -343,6 +341,8 @@ Window
                             // should add some logic
                         }
                     }
+
+                    enabled: isDec
                 }
 
 
