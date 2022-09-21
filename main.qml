@@ -7,10 +7,10 @@ Window
     id: myWindow
     visible: true
     width: 480
-    height: 800
+    height: isDec ? 750 : 840
     title: qsTr("Calculator")
 
-
+    property bool isDec: true
 
     Item
     {
@@ -71,8 +71,8 @@ Window
                     onClicked:
                     {
                         console.log("clicked:", button.text)
-                        myWindow.width = 480 + 100
-                        keysArea.visible = dec.checked ? true : false
+                        myWindow.isDec = dec.checked
+                        // keysArea.visible = dec.checked ? true : false
                     }
                 }
 
@@ -106,6 +106,8 @@ Window
                 }
             }
 
+            // ------------------------------------ //
+
             Rectangle
             {
                 id: keysArea
@@ -113,13 +115,17 @@ Window
                 y: diplay.height + settingsArea.height + 40
                 color: "#c0c0c0"
                 width: rootRect.width - x * 2
-                height: 500
+                height: myWindow.isDec ? 450 : 540
                 clip: true
 
-                property int nrKeysOnColumn: 5
+                property int nrKeysOnColumn: myWindow.isDec ? 5 : 6
                 property int nrKeysOnRow: 4
 
+                property int keyWidth: keysArea.width / keysArea.nrKeysOnRow
+                property int keyHeight: keysArea.height / keysArea.nrKeysOnColumn
+
                 // ---- 3 free keys -----
+
 
                 Row
                 {
@@ -132,17 +138,53 @@ Window
                         {
                         }
                     }
+
+                    // visible: myWindow.isDec ? true : false
+                    visible: false
                 }
 
-
                 //-------------------------------//
+
+                // ---- ONLY FOR HEXA ---------- //
+
+                Grid
+                {
+                    x: 0; y: 0
+                    rows: 2; columns: 3;
+
+                    Repeater
+                    {
+                        model: ["A", "B", "C", "D", "E", "F"]
+                        CalculatorKey
+                        {
+                             CalculatorKeyText
+                             {
+                                   text: modelData
+                             }
+                             property var keyBaseColor: "white"
+                             property var keyColorOnPress: "#dcdcdc"
+
+                             CalculatorKeyMouse
+                             {
+                                   onClicked:
+                                   {
+                                       isplayText.text += modelData
+                                        // should add some logic
+                                   }
+                             }
+                         }
+                    }
+                    visible: myWindow.isDec ? false : true
+                 }
+
+                // ----------------------------- //
 
                 // DIGITS
 
                 Column
                 {
-                    x: 0 * keysArea.width / keysArea.nrKeysOnRow
-                    y: 1 * keysArea.height / keysArea.nrKeysOnColumn
+                    x: 0 * keysArea.keyWidth
+                    y: (myWindow.isDec ? 1 : 2) * keysArea.keyHeight
                     spacing: 0
                     Repeater
                     {
@@ -170,8 +212,8 @@ Window
 
                 Column
                 {
-                    x: 1 * keysArea.width / keysArea.nrKeysOnRow
-                    y: 1 * keysArea.height / keysArea.nrKeysOnColumn
+                    x: 1 * keysArea.keyWidth
+                    y: (myWindow.isDec ? 1 : 2) * keysArea.keyHeight
                     spacing: 0
                     Repeater
                     {
@@ -200,8 +242,8 @@ Window
 
                 Column
                 {
-                    x: 2 * keysArea.width / keysArea.nrKeysOnRow
-                    y: 1 * keysArea.height / keysArea.nrKeysOnColumn
+                    x: 2 * keysArea.keyWidth
+                    y: (myWindow.isDec ? 1 : 2) * keysArea.keyHeight
                     spacing: 0
                     Repeater
                     {
@@ -232,7 +274,8 @@ Window
 
                 Column
                 {
-                    x: 3 * keysArea.width / 4; y: 0
+                    x: 3 * keysArea.keyWidth
+                    y: (myWindow.isDec ? 0 : 1) * keysArea.keyHeight
                     spacing: 0
                     Repeater
                     {
@@ -262,8 +305,8 @@ Window
 
                 CalculatorKey
                 {
-                    x: 0 * keysArea.width / keysArea.nrKeysOnRow
-                    y: 4 * keysArea.height / keysArea.nrKeysOnColumn
+                    x: 0 * keysArea.keyWidth
+                    y: (myWindow.isDec ? 4 : 5) * keysArea.keyHeight
                     property var keyBaseColor: "#d8bfd8"
                     property var keyColorOnPress: "#ff69b4"
                     color: keyBaseColor
@@ -283,8 +326,8 @@ Window
 
                 CalculatorKey
                 {
-                    x: 2 * keysArea.width / keysArea.nrKeysOnRow
-                    y: 4 * keysArea.height / keysArea.nrKeysOnColumn
+                    x: 2 * keysArea.keyWidth
+                    y: (myWindow.isDec ? 4 : 5) * keysArea.keyHeight
                     CalculatorKeyText
                     {
                         text: "."
@@ -305,8 +348,8 @@ Window
 
                 CalculatorKey
                 {
-                    x: 3 * keysArea.width / keysArea.nrKeysOnRow
-                    y: 4 * keysArea.height / keysArea.nrKeysOnColumn
+                    x: 3 * keysArea.keyWidth
+                    y: (myWindow.isDec ? 4 : 5) * keysArea.keyHeight
                     property var keyBaseColor: "#d8bfd8"
                     property var keyColorOnPress: "#ff69b4"
                     color: keyBaseColor
