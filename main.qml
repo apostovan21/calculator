@@ -8,15 +8,14 @@ Window
     id: myWindow
     visible: true
     width: 480
-    height: isDec ? 750 : 840
+    height: myWindow.isDec ? 750 : 840
     title: qsTr("Calculator")
 
     property bool isDec: true
 
-    // Logic
     CalculatorLogic
     {
-         id: logic
+        id: logic
     }
 
     Item
@@ -32,11 +31,12 @@ Window
             width: myWindow.width - x * 2
             height: myWindow.height - y * 2
 
+            focus: true
+
             Rectangle
             {
                 id: diplay
-                x: 10
-                y: 10
+                x: 10; y: 10
                 color: "#f5f5f5"
                 width: rootRect.width - x * 2
                 height: 130
@@ -52,32 +52,30 @@ Window
                     verticalAlignment: Text.AlignBottom
                     font.family: "Cascadia Code"
                     text: ""
-                    focus: true
-                    Keys.onReleased:
-                    {
-                        if ( event.key === Qt.Key_Enter )
-                        {
-                             displayText.text = "Result??"
-                        }
-                        else if ( event.key === Qt.Key_Delete  )
-                        {
-                             displayText.text = logic.onCleanInput();
-                        }
-                        else
-                        {
-                            displayText.text = logic.onKeyboardInput(event.text);
-                            console.log("input:", event.text)
-
-                        }
-                    }
                 }
             }
+
+            Keys.onReleased:
+            {
+                if ( event.key === Qt.Key_Enter || event.text === "=")
+                {
+                     displayText.text = logic.onEnterEqualInput();
+                }
+                else if ( event.key === Qt.Key_Delete  )
+                {
+                     displayText.text = logic.onCleanInput();
+                }
+                else
+                {
+                    displayText.text = logic.onKeyboardInput(event.text);
+                }
+            }
+
 
             Rectangle
             {
                 id: settingsArea
-                x: 10
-                y: diplay.height + 20
+                x: 10; y: diplay.height + 20
 
                 width: rootRect.width - x * 2
                 height: 40
@@ -89,9 +87,8 @@ Window
                     id: settingsRadioBtnGroup
                     onClicked:
                     {
-                        console.log("clicked:", button.text)
+                        logic.setCalcType(dec.checked ? CalculatorLogic.Dec : CalculatorLogic.Hex)
                         myWindow.isDec = dec.checked
-                        // keysArea.visible = dec.checked ? true : false
                     }
                 }
 
@@ -145,6 +142,40 @@ Window
 
                 // ---- ONLY FOR HEXA ---------- //
 
+                ListModel {
+                    id: hexaKeysModel
+                    ListElement { key: "A"; }
+                    ListElement { key: "B"; }
+                    ListElement { key: "C"; }
+                    ListElement { key: "D"; }
+                    ListElement { key: "E"; }
+                    ListElement { key: "F"; }
+                }
+
+                ListModel {
+                    id: digitKeysModel
+                    ListElement { key: "7"; }
+                    ListElement { key: "8"; }
+                    ListElement { key: "9"; }
+                    ListElement { key: "4"; }
+                    ListElement { key: "5"; }
+                    ListElement { key: "6"; }
+                    ListElement { key: "1"; }
+                    ListElement { key: "2"; }
+                    ListElement { key: "3"; }
+                    ListElement { key: ""; }
+                    ListElement { key: "0"; }
+                    ListElement { key: ""; }
+                }
+
+                ListModel {
+                    id: operatorKeysModel
+                    ListElement { key: "/"; }
+                    ListElement { key: "*"; }
+                    ListElement { key: "-"; }
+                    ListElement { key: "+"; }
+                }
+
                 Grid
                 {
                     x: 0; y: 0
@@ -152,22 +183,21 @@ Window
 
                     Repeater
                     {
-                        model: ["A", "B", "C", "D", "E", "F"]
+                        model: hexaKeysModel
                         CalculatorKey
                         {
                              CalculatorKeyText
                              {
                                    text: modelData
                              }
-                             property var keyBaseColor: "white"
-                             property var keyColorOnPress: "#dcdcdc"
+                             property color keyBaseColor: "white"
+                             property color keyColorOnPress: "#dcdcdc"
 
                              CalculatorKeyMouse
                              {
                                    onClicked:
                                    {
-                                       displayText.text += modelData
-                                        // should add some logic
+                                       displayText.text = logic.onLetterInput(modelData);
                                    }
                              }
                          }
@@ -175,98 +205,36 @@ Window
                     visible: myWindow.isDec ? false : true
                  }
 
-                // ----------------------------- //
-
                 // DIGITS
 
-                Column
+                Grid
                 {
-                    x: 0 * keysArea.keyWidth
-                    y: (myWindow.isDec ? 1 : 2) * keysArea.keyHeight
-                    spacing: 0
+                    x: 0 * keysArea.keyWidth; y: (myWindow.isDec ? 1 : 2) * keysArea.keyHeight
+                    rows: 4; columns: 3;
+
                     Repeater
                     {
-                        model: ["7", "4", "1"]
-                        delegate: CalculatorKey
+                        model: digitKeysModel
+                        CalculatorKey
                         {
-                            CalculatorKeyText
-                            {
-                                text: modelData
-                            }
-                            property var keyBaseColor: "white"
-                            property var keyColorOnPress: "#dcdcdc"
+                             CalculatorKeyText
+                             {
+                                   text: modelData
+                             }
+                             property color keyBaseColor: "white"
+                             property color keyColorOnPress: "#dcdcdc"
 
-                            CalculatorKeyMouse
-                            {
-                                onClicked:
-                                {
-                                    displayText.text += modelData
-                                    // should add some logic
-                                }
-                            }
-                        }
+                             CalculatorKeyMouse
+                             {
+                                   onClicked:
+                                   {
+                                       displayText.text = logic.onDigitInput(modelData);
+                                   }
+                             }
+                         }
                     }
-                }
+                 }
 
-                Column
-                {
-                    x: 1 * keysArea.keyWidth
-                    y: (myWindow.isDec ? 1 : 2) * keysArea.keyHeight
-                    spacing: 0
-                    Repeater
-                    {
-                        model: ["8", "5", "2", "0"]
-                        delegate: CalculatorKey
-                        {
-                            CalculatorKeyText
-                            {
-                                text: modelData
-                            }
-
-                            property var keyBaseColor: "white"
-                            property var keyColorOnPress: "#dcdcdc"
-
-                            CalculatorKeyMouse
-                            {
-                                onClicked:
-                                {
-                                    displayText.text += modelData
-                                    // should add some logic
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Column
-                {
-                    x: 2 * keysArea.keyWidth
-                    y: (myWindow.isDec ? 1 : 2) * keysArea.keyHeight
-                    spacing: 0
-                    Repeater
-                    {
-                        model: ["9", "6", "3"]
-                        delegate: CalculatorKey
-                        {
-                            CalculatorKeyText
-                            {
-                                text: modelData
-                            }
-
-                            property var keyBaseColor: "white"
-                            property var keyColorOnPress: "#dcdcdc"
-
-                            CalculatorKeyMouse
-                            {
-                                onClicked:
-                                {
-                                    displayText.text += modelData
-                                    // should add some logic
-                                }
-                            }
-                        }
-                    }
-                }
 
                 // OPERATORS
 
@@ -277,11 +245,11 @@ Window
                     spacing: 0
                     Repeater
                     {
-                        model: ["/", "*", "-", "+"]
+                        model:operatorKeysModel
                         delegate: CalculatorKey
                         {
-                            property var keyBaseColor: "lightBlue"
-                            property var keyColorOnPress: "#00ced1"
+                            property color keyBaseColor: "lightBlue"
+                            property color keyColorOnPress: "#00ced1"
                             color: keyBaseColor
                             CalculatorKeyText
                             {
@@ -291,8 +259,7 @@ Window
                             {
                                 onClicked:
                                 {
-                                    displayText.text += modelData
-                                    // should add some logic for opertors
+                                    displayText.text = logic.onOperationInput(modelData);
                                 }
                             }
                         }
@@ -305,8 +272,8 @@ Window
                 {
                     x: 0 * keysArea.keyWidth
                     y: (myWindow.isDec ? 4 : 5) * keysArea.keyHeight
-                    property var keyBaseColor: "#d8bfd8"
-                    property var keyColorOnPress: "#ff69b4"
+                    property color keyBaseColor: "#d8bfd8"
+                    property color keyColorOnPress: "#ff69b4"
                     color: keyBaseColor
                     CalculatorKeyText
                     {
@@ -316,8 +283,7 @@ Window
                     {
                         onClicked:
                         {
-                            displayText.text = ""
-                            // should add some logic
+                            displayText.text = logic.onCleanInput();
                         }
                     }
                 }
@@ -330,19 +296,18 @@ Window
                     {
                         text: "."
                     }
-                    property var keyBaseColor: "white"
-                    property var keyColorOnPress: "#dcdcdc"
+                    property color keyBaseColor: "white"
+                    property color keyColorOnPress: "#dcdcdc"
 
                     CalculatorKeyMouse
                     {
                         onClicked:
                         {
-                            displayText.text += "."
-                            // should add some logic
+                            displayText.text = logic.onDotInput();
                         }
                     }
 
-                    enabled: isDec
+                    enabled: myWindow.isDec
                 }
 
 
@@ -350,8 +315,8 @@ Window
                 {
                     x: 3 * keysArea.keyWidth
                     y: (myWindow.isDec ? 4 : 5) * keysArea.keyHeight
-                    property var keyBaseColor: "#d8bfd8"
-                    property var keyColorOnPress: "#ff69b4"
+                    property color keyBaseColor: "#d8bfd8"
+                    property color keyColorOnPress: "#ff69b4"
                     color: keyBaseColor
                     CalculatorKeyText
                     {
@@ -361,8 +326,7 @@ Window
                     {
                         onClicked:
                         {
-                            displayText.text = "Result??"
-                            // should add some logic
+                            displayText.text = logic.onEnterEqualInput();
                         }
                     }
                 }

@@ -18,3 +18,7 @@ int main(int argc, char *argv[])
 
     return app.exec();
 }
+
+
+// Sa adaug un plugin (orice) sa aiba un fisier .pro al lui
+// calculator login sa fie in acel plagin

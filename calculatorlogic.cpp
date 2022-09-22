@@ -1,5 +1,9 @@
 #include "calculatorlogic.hpp"
 
+#include <iostream>
+
+//--------------------------------------------------------------------------//
+const QString DOT {"."};
 CalculatorLogic::CalculatorLogic()
 {
 
@@ -20,19 +24,19 @@ void CalculatorLogic::setOperationType(const QString& newType) noexcept
 {
     if(newType == "+")
     {
-        operationType = addition;
+        operationType = Addition;
     }
     else if(newType == "-")
     {
-        operationType = substraction;
+        operationType = Substraction;
     }
     else if(newType == "*")
     {
-        operationType = multiplication;
+        operationType = Multiplication;
     }
     else if(newType == "/")
     {
-        operationType = division;
+        operationType = Division;
     }
     onOperationTypeChanged();
 }
@@ -45,11 +49,12 @@ CalculatorLogic::CalculatoryType CalculatorLogic::getCalcType()const noexcept
 void CalculatorLogic::setCalcType(const CalculatoryType& newType) noexcept
 {
     calculatorType = newType;
+    resetAll();
 }
 //---------------------------------------------------------------------------//
 QString CalculatorLogic::onKeyboardInput( const QString& value ) noexcept
 {
-    if(rightOperand.size() > 0 and isValidOperation(value))
+    if( isValidOperation(value))
     {
         return onOperationInput(value);
     }
@@ -59,14 +64,17 @@ QString CalculatorLogic::onKeyboardInput( const QString& value ) noexcept
         return onDigitInput(value);
     }
 
-    if(calculatorType == CalculatorLogic::CalculatoryType::hex and
-            isALetterFormAToF(value))
+    if(not isDec() and isALetterFormAToF(value))
     {
-        rightOperand += value;
-        updateOutput();
+        return onLetterInput(value);
     }
 
-    return output;
+    if(value == DOT)
+    {
+        return onDotInput();
+    }
+
+    return output; // other chars
 }
 //---------------------------------------------------------------------------//
 QString CalculatorLogic::onDigitInput( const QString& value ) noexcept
@@ -76,9 +84,41 @@ QString CalculatorLogic::onDigitInput( const QString& value ) noexcept
     return output;
 }
 //---------------------------------------------------------------------------//
+QString CalculatorLogic::onLetterInput( const QString& value ) noexcept
+{
+    rightOperand += value;
+    updateOutput();
+    return output;
+}
+//---------------------------------------------------------------------------//
 QString CalculatorLogic::onOperationInput( const QString& value ) noexcept
 {
+    if(rightOperand.size() == 0)
+    {
+        return output;
+    }
     setOperationType(value);
+    updateOutput();
+    return output;
+}
+//---------------------------------------------------------------------------//
+QString CalculatorLogic::onDotInput() noexcept
+{
+    if(not isDec() or rightOperand.contains(DOT))
+    {
+        // DOt is not allowed for hexa operations
+        return output;
+    }
+
+    if(rightOperand.size() == 0)
+    {
+        rightOperand = "0.";
+    }
+    else
+    {
+        rightOperand += DOT;
+    }
+
     updateOutput();
     return output;
 }
@@ -133,6 +173,30 @@ QString CalculatorLogic::onCleanInput() noexcept
     return output;
 }
 //---------------------------------------------------------------------------//
+QString CalculatorLogic::onEnterEqualInput() noexcept
+{
+    if(not isExpressionValid())
+    {
+        return output;
+    }
+
+    if(isDec())
+    {
+        double result = doCalculationDec();
+        resetAll();
+        rightOperand = QString::number(result);
+        updateOutput();
+    }
+    else
+    {
+        QString result = doCalculationHex();
+        resetAll();
+        rightOperand = result;
+        updateOutput();
+    }
+    return output;
+}
+//---------------------------------------------------------------------------//
 void CalculatorLogic::resetOutput() noexcept
 {
     output = "";
@@ -150,7 +214,7 @@ void CalculatorLogic::resetRightOperator() noexcept
 //---------------------------------------------------------------------------//
 void CalculatorLogic::resetOperationType() noexcept
 {
-    operationType = noOperation;
+    operationType = NoOperation;
 }
 //---------------------------------------------------------------------------//
 void CalculatorLogic::resetAll() noexcept
@@ -164,16 +228,16 @@ void CalculatorLogic::resetAll() noexcept
 QString CalculatorLogic::operationTypeToString() const noexcept
 {
     switch (operationType) {
-    case addition:
+    case Addition:
         return "+";
         break;
-    case substraction:
+    case Substraction:
         return "-";
         break;
-    case multiplication:
+    case Multiplication:
         return "*";
         break;
-    case division:
+    case Division:
         return "/";
         break;
     default:
@@ -185,7 +249,82 @@ QString CalculatorLogic::operationTypeToString() const noexcept
 void CalculatorLogic::onOperationTypeChanged()
 {
     leftOperand = rightOperand;
-    rightOperand = "";
+    resetRightOperator();
 }
 //---------------------------------------------------------------------------//
+bool CalculatorLogic::isDec() const noexcept
+{
+    return calculatorType == Dec;
+}
+//---------------------------------------------------------------------------//
+double CalculatorLogic::doCalculationDec() const noexcept
+{
+    double arg1 = leftOperand.toDouble();
+    double arg2 = rightOperand.toDouble();
+
+    switch (operationType)
+    {
+    case Addition:
+        return arg1 + arg2;
+        break;
+    case Substraction:
+        return arg1 - arg2;
+        break;
+    case Multiplication:
+        return arg1 * arg2;
+        break;
+    case Division:
+        return arg1 / arg2;
+        break;
+    default:
+        return 0; // should never happen
+        break;
+    }
+}
+//---------------------------------------------------------------------------//
+QString CalculatorLogic::doCalculationHex() const noexcept
+{
+    bool ok;
+
+    int arg1 = leftOperand.toInt(&ok, 16);
+    int arg2 = rightOperand.toInt(&ok, 16);
+
+    if (not ok) {
+        return output;
+    }
+
+    int result = 0;
+    switch (operationType)
+    {
+    case Addition:
+        result = arg1 + arg2;
+        break;
+    case Substraction:
+        result = arg1 - arg2;
+        break;
+    case Multiplication:
+        result = arg1 * arg2;
+        break;
+    case Division:
+        result = arg1 / arg2;
+        break;
+    default:
+        result = 0; // should never happen
+        break;
+    }
+
+    QString hexadecimal;
+    hexadecimal.setNum(result,16);
+    return hexadecimal;
+}
+//---------------------------------------------------------------------------//
+bool CalculatorLogic::isExpressionValid() const noexcept
+{
+    if (leftOperand.size() > 0 and rightOperand.size() > 0 and
+            operationType not_eq NoOperation)
+    {
+        return true;
+    }
+    return false;
+}
 //---------------------------------------------------------------------------//
