@@ -1,21 +1,19 @@
-#ifndef CALCULATORLOGIC_HPP
-#define CALCULATORLOGIC_HPP
+#ifndef CALCULATORLOGIC_H
+#define CALCULATORLOGIC_H
 
+#include <QQuickItem>
 #include <QObject>
 #include <QString>
+
 
 class CalculatorLogic : public QObject
 {
     Q_OBJECT
+    // Q_DISABLE_COPY(CalculatorLogic)
+    // QML_NAMED_ELEMENT(CalculatorLogic)
 
-//    Q_PROPERTY( OperationType operation READ getOperationType WRITE setOperationType )
-//    Q_PROPERTY( CalculatoryType type READ getCalcType WRITE setCalcType )
-
-
-    // this should be the parent class
-    // we need 2 child classes: dec + hex
 public:
-    CalculatorLogic();
+    CalculatorLogic(QObject *parent = nullptr);
     virtual ~CalculatorLogic( ) noexcept = default;
 
     enum OperationType { NoOperation, Addition, Substraction, Multiplication, Division};
@@ -68,4 +66,4 @@ private:
     //void onCalcTypeChanged();
 };
 
-#endif // CALCULATORLOGIC_HPP
+#endif // CALCULATORLOGIC_H

@@ -1,12 +1,17 @@
-#include "calculatorlogic.hpp"
+#include "calculatorlogic.h"
 
 #include <iostream>
 
-//--------------------------------------------------------------------------//
 const QString DOT {"."};
-CalculatorLogic::CalculatorLogic()
+//---------------------------------------------------------------------------//
+CalculatorLogic::CalculatorLogic(QObject *parent):
+    QObject(parent)
 {
+    // By default, QQuickItem does not draw anything. If you subclass
+    // QQuickItem to create a visual item, you will need to uncomment the
+    // following line and re-implement updatePaintNode()
 
+    // setFlag(ItemHasContents, true);
 }
 //---------------------------------------------------------------------------//
 CalculatorLogic::OperationType CalculatorLogic::getOperationType()const noexcept
@@ -274,7 +279,7 @@ double CalculatorLogic::doCalculationDec() const noexcept
         return arg1 * arg2;
         break;
     case Division:
-        return arg1 / arg2;
+        return (arg2 == 0 ? 0: arg1 / arg2);
         break;
     default:
         return 0; // should never happen
@@ -328,3 +333,4 @@ bool CalculatorLogic::isExpressionValid() const noexcept
     return false;
 }
 //---------------------------------------------------------------------------//
+

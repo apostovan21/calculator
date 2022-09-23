@@ -357,6 +357,11 @@ Window
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
+
+                // support for translations
+                // qt linguist
+                // button -> dropdown list (combo) -> o lista cu limbi, si in functie de ce limba se alege se trimite semnal, si se implementeaza internationalizarea
+
             }
 
             // ------------ //
