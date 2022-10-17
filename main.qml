@@ -2,6 +2,8 @@ import QtQuick 2.9
 import QtQuick.Window 2.2
 import QtQuick.Controls 2.2
 import CalculatorLogic 1.0
+import CalculatorSettings 1.0
+//import logic 1.0
 
 Window
 {
@@ -9,13 +11,18 @@ Window
     visible: true
     width: 480
     height: myWindow.isDec ? 750 : 840
-    title: qsTr("Calculator")
+    title: qsTr("Calculator") + settings.emptyString
 
     property bool isDec: true
 
     CalculatorLogic
     {
         id: logic
+    }
+
+    CalculatorSettings
+    {
+        id: settings
     }
 
     Item
@@ -72,13 +79,34 @@ Window
             }
 
 
+            ComboBox
+            {
+                id: languageList
+                x: 10; y: diplay.height + settingsArea.height + 10; z: 1
+                currentIndex: 0
+                model: ListModel {
+                    id: languages
+                    ListElement { text: qsTr("English");}
+                    ListElement { text: qsTr("French");}
+                    ListElement { text: qsTr("Romanian");}
+                }
+                width: settingsArea.width / 3
+                visible: false
+                onCurrentIndexChanged:
+                {
+                    settings.selectLanguage(languages.get(currentIndex).text);
+                    languageList.visible = false;
+                }
+            }
+
+
             Rectangle
             {
                 id: settingsArea
                 x: 10; y: diplay.height + 20
 
                 width: rootRect.width - x * 2
-                height: 40
+                height: 50
 
                 color: "#f5f5f5"
 
@@ -92,31 +120,56 @@ Window
                     }
                 }
 
-
                 Row {
                     spacing: 5
-                    Label {
-                        x: 10; y: 10
+                    x: 10; y: 10
+
+                    Rectangle
+                    {
+                        id: settingLanguabeBtn
+                        height: 30
+                        width: 30
+
+                        MouseArea
+                        {
+                            anchors.fill: parent
+                            onClicked:
+                            {
+                                languageList.visible = true
+                            }
+                        }
+
+                        Image
+                        {
+                            source: "./images/setting_btn.jpg"
+                            height: settingLanguabeBtn.height
+                            width: settingLanguabeBtn.width
+                        }
+                    }
+
+                    Label
+                    {
+                        // x: 10; y: 10
                         height: settingsArea.height - 20
                         width: settingsArea.width / 2
-                        text: qsTr("Choose the base:")
+                        text: qsTr("Choose the base:") + settings.emptyString
                         font.pixelSize: 16
                         font.bold: true
                         horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignTop
+                        verticalAlignment: Text.AlignVCenter
                         color: "black"
                     }
 
                     RadioButton {
                         id: dec
                         checked: true
-                        text: qsTr("DEC")
+                        text: qsTr("DEC") + settings.emptyString
                         ButtonGroup.group: settingsRadioBtnGroup
                     }
 
                     RadioButton {
                         id: hex
-                        text: qsTr("HEX")
+                        text: qsTr("HEX") + settings.emptyString
                         ButtonGroup.group: settingsRadioBtnGroup
                     }
                 }
@@ -128,7 +181,7 @@ Window
             {
                 id: keysArea
                 x: 10
-                y: diplay.height + settingsArea.height + 40
+                y: diplay.height + settingsArea.height + 30
                 color: "#c0c0c0"
                 width: rootRect.width - x * 2
                 height: myWindow.isDec ? 450 : 540
@@ -351,17 +404,12 @@ Window
                     width: info.width
                     height: info.height
 
-                    text: "Calculator made by Andreea P. for training purposes"
+                    text: qsTr("Calculator made by Andreea P. for training purposes") + settings.emptyString
                     font.pixelSize: 14
                     font.italic: true
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-
-                // support for translations
-                // qt linguist
-                // button -> dropdown list (combo) -> o lista cu limbi, si in functie de ce limba se alege se trimite semnal, si se implementeaza internationalizarea
-
             }
 
             // ------------ //

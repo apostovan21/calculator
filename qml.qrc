@@ -4,5 +4,8 @@
         <file>CalculatorKey.qml</file>
         <file>CalculatorKeyText.qml</file>
         <file>CalculatorKeyMouse.qml</file>
+        <file>main_ro.qm</file>
+        <file>main_en.qm</file>
+        <file>main_fr.qm</file>
     </qresource>
 </RCC>
